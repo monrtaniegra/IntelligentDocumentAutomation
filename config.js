@@ -1,7 +1,8 @@
-const CONFIG = {
-    uploadUrl: "https://johcgadsl1.execute-api.us-east-1.amazonaws.com/prod/uploadBDA",
-    statusUrl: "https://johcgadsl1.execute-api.us-east-1.amazonaws.com/prod/status",
-    previewUrl: "https://johcgadsl1.execute-api.us-east-1.amazonaws.com/prod/preview",
-    apiBaseUrl: "https://johcgadsl1.execute-api.us-east-1.amazonaws.com/prod",
-    GET_MY_DOCUMENTS_API: "https://johcgadsl1.execute-api.us-east-1.amazonaws.com/prod/my-documents"
+window.CONFIG = {
+    uploadUrl: "__UPLOAD_URL__",
+    statusUrl: "__STATUS_URL__",
+    previewUrl: "__PREVIEW_URL__",
+    GET_MY_DOCUMENTS_API: "__GET_MY_DOCUMENTS_API__",
+    ADMIN_DOCUMENTS_API: "__ADMIN_DOCUMENTS_API__",
+    ADMIN_UPDATE_API: "__ADMIN_UPDATE_API__"
 };
