@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifyInfo AI</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="landing-page">
+
+    <!-- NAV -->
+    <div class="container">
+        <nav class="navbar glass">
+
+            <div class="logo">
+                <div class="logo-badge">AI</div>
+
+                <div class="logo-text">
+                    <div class="logo-title">IDA</div>
+                    <div class="logo-sub">Intelligent Document Automation</div>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <a href="login.html" class="nav-link">Sign In</a>
+                <a href="login.html" class="btn-primary">Get Started</a>
+            </div>
+
+        </nav>
+    </div>
+
+    <!-- HERO -->
+    <div class="container">
+        <section class="hero">
+
+            <div class="hero-left">
+
+                <div class="tag glass">
+                    ✨ AI Powered Verification
+                </div>
+
+                <h1>
+                    Smarter Document<br>
+                    Verification <br>
+                
+                </h1>
+
+                <p>
+                    Upload identity documents, extract structured data,
+                     and verify authenticity
+                    in one seamless workflow powered by AWS Bedrock Automation.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="login.html" class="btn-primary">
+                        Start Verifying
+                    </a>
+
+                    <a href="#features" class="btn-secondary">
+                        Learn More
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- preview -->
+            <div class="hero-right">
+
+                <div class="dashboard-preview glass">
+
+                    <div class="preview-header">
+                        Live Verification Feed
+                    </div>
+
+                    <div class="preview-card">
+                        <div>
+                            <h4>passport_scan.pdf</h4>
+                            <p>Analyzing document...</p>
+                        </div>
+                        <span class="status processing">Processing</span>
+                    </div>
+
+                    <div class="preview-card">
+                        <div>
+                            <h4>birth_certificate.jpg</h4>
+                            <p>Verification complete</p>
+                        </div>
+                        <span class="status verified">Verified</span>
+                    </div>
+
+                    <div class="preview-card">
+                        <div>
+                            <h4>marriage_cert.png</h4>
+                            <p>Seal mismatch detected</p>
+                        </div>
+                        <span class="status fraud">Rejected</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="container">
+        <section id="features" class="features">
+
+            <div class="feature glass">
+                <h3>Automated Extraction</h3>
+                <p>
+                    Extract names, dates, IDs, and document fields
+                    automatically using Bedrock Automation.
+                </p>
+            </div>
+
+            <div class="feature glass">
+                <h3>Validation</h3>
+                <p>
+                    Detect suspicious metadata, tampering,
+                    and inconsistent document structures.
+                </p>
+            </div>
+
+            <div class="feature glass">
+                <h3>Realtime Tracking</h3>
+                <p>
+                    Track document progress from upload to extraction,
+                    analysis, and final verification.
+                </p>
+            </div>
+
+        </section>
+    </div>
+
+</div>
+
+<script src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | VerifyInfo AI</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="auth-page">
+
+    <div class="auth-card glass">
+
+        <!-- Logo -->
+        <div class="logo">
+            <div class="logo-badge">AI</div>
+
+            <div class="logo-text">
+                <div class="logo-title">IDA</div>
+                <div class="logo-sub">Intelligent Document Automation</div>
+            </div>
+        </div>
+
+        <h1>Welcome Back</h1>
+
+        <p class="auth-subtitle">
+            Sign in to upload, verify, and manage documents securely.
+        </p>
+
+        <form id="loginForm">
+
+            <div class="input-group">
+                <label>Email Address</label>
+                <input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                >
+            </div>
+
+            <!-- role -->
+            <div class="role-selector">
+
+                <label class="role-card active">
+                    <input
+                        type="radio"
+                        name="role"
+                        value="customer"
+                        checked
+                    >
+                    Customer Portal
+                </label>
+
+                <label class="role-card">
+                    <input
+                        type="radio"
+                        name="role"
+                        value="admin"
+                    >
+                    Admin Portal
+                </label>
+
+            </div>
+
+            <button id="loginBtn" class="btn-primary btn-block" type="button">
+                Sign In
+            </button>
+
+        </form>
+
+        <div class="auth-footer">
+            
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Password Change Modal -->
+<div id="passwordModal" class="modal hidden">
+
+    <div class="modal-overlay"></div>
+
+    <div class="modal-content auth-modal">
+
+        <div class="modal-header">
+            <h2>Change Password</h2>
+        </div>
+
+        <p class="modal-subtitle">
+            You are signing in for the first time.
+            Please create a permanent password.
+        </p>
+
+        <div class="input-group">
+            <label>New Password</label>
+
+            <input
+                type="password"
+                id="newPasswordInput"
+                placeholder="Enter new password"
+            >
+        </div>
+
+        <button
+            id="submitNewPassword"
+            class="btn-primary btn-block"
+        >
+            Save Password
+        </button>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.9/dist/amazon-cognito-identity.min.js"></script>
+<script src="auth.js"></script>
+<div id="toast" class="toast hidden"></div>
+</body>
+</html>

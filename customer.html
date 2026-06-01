@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard | IDA</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <!-- Sidebar -->
+    <aside class="sidebar glass">
+        <div class="logo">
+            <div class="logo-badge">AI</div>
+
+            <div class="logo-text">
+                <div class="logo-title">IDA</div>
+                <div class="logo-sub">Customer Portal</div>
+            </div>
+        </div>
+
+        <nav id="customerNav">
+
+            <a
+                class="nav-link active"
+                data-view="dashboard"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                class="nav-link"
+                data-view="history"
+            >
+                Verification History
+            </a>
+
+            <a
+                class="nav-link"
+                data-view="profile"
+            >
+                Profile
+            </a>
+
+            <a href="index.html">
+                Logout
+            </a>
+
+        </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboardView">
+
+            <header class="topbar">
+
+                <div>
+                    <h1>Hello Customer 👋</h1>
+
+                    <p>
+                        Upload and monitor your document verification status.
+                    </p>
+                </div>
+
+                <button id="uploadBtn" class="btn-primary">
+                    + Upload Document
+                </button>
+
+            </header>
+
+            <!-- stats -->
+            <section class="stats">
+
+                <div class="card stat-card">
+                    <p>Total Uploaded</p>
+                    <h2 id="statTotal">0</h2>
+                </div>
+
+                <div class="card stat-card">
+                    <p>Verified</p>
+                    <h2 id="statVerified">0</h2>
+                </div>
+
+                <div class="card stat-card">
+                    <p>Processing</p>
+                    <h2 id="statProcessing">0</h2>
+                </div>
+
+                <div class="card stat-card">
+                    <p>Flagged</p>
+                    <h2 id="statFlagged">0</h2>
+                </div>
+
+            </section>
+
+            <!-- content -->
+            <section class="content-grid">
+
+                <!-- LEFT -->
+                <div class="card documents-panel">
+
+                    <h3>Recent Uploads</h3>
+
+                    <!-- Dynamic uploads only -->
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="card details-panel">
+
+                    <h3>Document Details</h3>
+
+                    <div class="preview-box" id="previewBox">
+                        Select a document to preview
+                    </div>
+
+                    <div id="customerDynamicFields"></div>
+
+                    <div class="detail-row">
+                        <label>Status</label>
+                        <span id="customerStatus">-</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <label>Notes</label>
+                        <span id="customerNotes">No notes yet</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <!-- HISTORY VIEW -->
+        <div
+            id="historyView"
+            style="display:none;"
+        >
+
+            <section class="card documents-panel">
+
+                <h3>Verification History</h3>
+
+                <div id="historyDocuments"></div>
+
+            </section>
+
+        </div>
+
+        <!-- PROFILE VIEW -->
+        <div
+            id="profileView"
+            style="display:none;"
+        >
+
+            <section class="card">
+
+                <h3>Customer Profile</h3>
+
+                <div class="profile-grid">
+
+                    <div class="detail-row">
+                        <label>Name</label>
+                        <span>Demo Customer</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <label>Email</label>
+                        <span>customer@verifyinfo.ai</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <label>Plan</label>
+                        <span>Enterprise Trial</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <label>Total Uploads</label>
+                        <span id="profileUploads">0</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="modal hidden">
+
+    <div class="modal-overlay"></div>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h2>Upload Document</h2>
+            <button id="closeModal">✕</button>
+        </div>
+
+        <div id="dropZone" class="drop-zone">
+            <p>Drag & drop your document here</p>
+            <span>or click to browse</span>
+            <input type="file" id="fileInput" hidden>
+        </div>
+
+        <div id="filePreview" class="file-preview hidden">
+            <p id="fileName"></p>
+        </div>
+
+        <button id="submitUpload" class="btn-primary btn-block">
+            Upload & Verify
+        </button>
+
+    </div>
+
+</div>
+
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | IDA</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass">
+
+        <div class="logo">
+            <div class="logo-badge">AI</div>
+
+            <div class="logo-text">
+                <div class="logo-title">IDA</div>
+                <div class="logo-sub">Admin Portal</div>
+            </div>
+        </div>
+
+
+        <nav id="adminNav">
+
+            <a
+                class="nav-link active"
+                data-view="active"
+            >
+                Active Queue
+            </a>
+
+            <a
+                class="nav-link"
+                data-view="assigned"
+            >
+                Assigned To Me
+            </a>
+
+            <a
+                class="nav-link"
+                data-view="completed"
+            >
+                Completed Queue
+            </a>
+
+            <a
+                class="nav-link"
+                data-view="analytics"
+            >
+                Analytics
+            </a>
+
+            <a href="index.html">
+                Logout
+            </a>
+
+        </nav>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- TOP -->
+        <header class="topbar">
+
+            <div>
+                <h1>Admin Dashboard 🛡️</h1>
+
+                <p>
+                    Review uploaded documents and monitor fraud activity.
+                </p>
+            </div>
+
+        </header>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboardView">
+
+            <!-- STATS -->
+            <section class="stats">
+
+                <div class="card stat-card">
+                    <p>Total Documents</p>
+                    <h2 id="adminTotal">0</h2>
+                </div>
+
+                <div class="card stat-card">
+                    <p>Verified</p>
+                    <h2 id="adminVerified">0</h2>
+                </div>
+
+                <div class="card stat-card">
+                    <p>Review</p>
+                    <h2 id="adminReview">0</h2>
+                </div>
+
+                <div class="card stat-card">
+                    <p>Fraud</p>
+                    <h2 id="adminFraud">0</h2>
+                </div>
+
+            </section>
+
+            <!-- FILTERS -->
+            <section class="admin-filters" id="topFilters">
+
+                <button class="filter-btn active" data-filter="ALL">
+                    All
+                </button>
+
+                <button class="filter-btn" data-filter="VERIFIED">
+                    Verified
+                </button>
+
+                <button class="filter-btn" data-filter="FRAUD">
+                    Fraud
+                </button>
+
+                <button class="filter-btn" data-filter="ONGOING">
+                    Processing
+                </button>
+
+            </section>
+
+            <!-- CONTENT -->
+            <section class="content-grid">
+
+                <!-- LEFT -->
+                <div class="card documents-panel">
+
+                    <h3>Verification Queue</h3>
+
+                    <div class="admin-toolbar">
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search document..."
+                        >
+
+                        <select id="statusFilter">
+
+                            <option value="">
+                                All Status
+                            </option>
+
+                            <option value="VERIFIED">
+                                Verified
+                            </option>
+
+                            <option value="REVIEW">
+                                Review
+                            </option>
+
+                            <option value="FRAUD">
+                                Fraud
+                            </option>
+
+                            <option value="ONGOING">
+                                Processing
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div id="adminDocuments"></div>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div id="reviewPanel" class="card details-panel">
+
+                    <h3>Review Details</h3>
+
+                    <div class="preview-box" id="previewBox">
+                        Select a document to review
+                    </div>
+
+                    <div id="dynamicFields"></div>
+
+                    <div class="detail-row">
+                        <label>Assigned To</label>
+                        <span id="assignedToText">
+                            Unassigned
+                        </span>
+                    </div>
+
+                    <!-- ACTIONS -->
+                     <div class="admin-note-section">
+                        <div class="timeline-section">
+
+                            <h4>
+                                Activity Timeline
+                            </h4>
+
+                            <div id="timelineList">
+                                No activity yet.
+                            </div>
+
+                        </div>
+
+                        <label class="note-label">
+                            Admin Review Notes
+                        </label>
+
+                        <textarea
+                            id="adminNotes"
+                            class="admin-notes"
+                            placeholder="Add investigation notes..."
+                        ></textarea>
+
+                        <div id="completedInfo"></div>
+
+                    </div>
+                    <button
+                        id="assignBtn"
+                        class="btn-secondary"
+                    >
+                        Assign To Me
+                    </button>
+                    <div class="admin-actions">
+
+                        <button id="validateBtn" class="btn-success">
+                            Validation Completed
+                        </button>
+                        <button id="rejectBtn" class="btn-danger">
+                            Reject Document
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <!-- ANALYTICS VIEW -->
+        <div
+            id="analyticsView"
+            style="display:none;"
+        >
+
+            <section class="analytics-grid">
+
+                <!-- Fraud Rate -->
+                <div class="card analytics-card">
+
+                    <div class="analytics-header">
+                        <h3>Fraud Rate</h3>
+                        <span id="fraudRateValue">0%</span>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div
+                            id="fraudRateBar"
+                            class="progress-fill danger"
+                            style="width:0%"
+                        ></div>
+                    </div>
+
+                </div>
+
+                <!-- Verification Rate -->
+                <div class="card analytics-card">
+
+                    <div class="analytics-header">
+                        <h3>Verification Success</h3>
+                        <span id="verificationRateValue">0%</span>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div
+                            id="verificationRateBar"
+                            class="progress-fill success"
+                            style="width:0%"
+                        ></div>
+                    </div>
+
+                </div>
+
+                <!-- Average Fraud Score -->
+                <div class="card analytics-card">
+
+                    <div class="analytics-header">
+                        <h3>Average Fraud Score</h3>
+                        <span id="avgFraudScore">
+                            0
+                        </span>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div
+                            id="avgFraudBar"
+                            class="progress-fill warning"
+                            style="width:0%"
+                        ></div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- DOCUMENT TYPES -->
+            <section class="card type-breakdown">
+
+                <h3>Document Type Distribution</h3>
+
+                <div id="documentTypeList"></div>
+
+            </section>
+
+        </div>
+    </main>
+
+</div>
+
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="admin.js"></script>
+
+<!-- CUSTOM MODAL -->
+<div id="customModal" class="custom-modal hidden">
+
+    <div class="custom-modal-box">
+
+        <h3 id="modalTitle">
+            Confirm Action
+        </h3>
+
+        <p id="modalMessage">
+            Are you sure?
+        </p>
+
+        <div class="modal-actions">
+
+            <button
+                id="modalCancel"
+                class="modal-btn secondary"
+            >
+                Cancel
+            </button>
+
+            <button
+                id="modalConfirm"
+                class="modal-btn primary"
+            >
+                Confirm
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden">
+    Success
+</div>
+
+
+
+</body>
+</html>
