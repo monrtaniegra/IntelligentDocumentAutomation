@@ -1189,3 +1189,30 @@ img{
     transform-origin: center center;
     transition: transform 0.12s ease;
 }
+
+.review-workspace {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.preview-workspace {
+    min-height: 760px;
+}
+
+#workspacePreviewBox {
+    height: 700px;
+}
+
+#workspaceDynamicFields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.details-panel {
+    height: calc(100vh - 180px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}

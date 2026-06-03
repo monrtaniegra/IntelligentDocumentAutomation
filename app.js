@@ -896,3 +896,13 @@ function formatFieldLabel(key) {
         .replace(/^./, str => str.toUpperCase())
         .trim();
 }
+
+function showQueueMode() {
+    document.getElementById("queueLayout").style.display = "grid";
+    document.getElementById("reviewWorkspace").style.display = "none";
+}
+
+function showReviewMode() {
+    document.getElementById("queueLayout").style.display = "none";
+    document.getElementById("reviewWorkspace").style.display = "grid";
+}
