@@ -1898,6 +1898,13 @@ async function populateWorkspaceDetails(data) {
     document.getElementById("workspaceAdminNotes").value =
         data.adminNotes || "";
 
+    const agentSelect =
+        document.getElementById("agentAssignSelect");
+
+    if (agentSelect) {
+        agentSelect.value = data.assignedTo || "";
+    }
+
     try {
         const res = await fetch(
             `${CONFIG.previewUrl}?documentId=${data.documentId}`
@@ -2082,9 +2089,22 @@ function updateWorkspacePermissions(doc) {
         } else {
 
             managerSection.style.display =
-                currentView === "active"
+                (
+                    currentView === "active" ||
+                    currentView === "assigned"
+                )
                     ? "block"
                     : "none";
+
+            const assignBtn =
+                document.getElementById("assignAgentBtn");
+
+            if (assignBtn) {
+                assignBtn.textContent =
+                    currentView === "assigned"
+                        ? "Reassign Document"
+                        : "Assign Document";
+            }
         }
 
         validateBtn.style.display = "none";
