@@ -38,6 +38,7 @@ const FIELD_CONFIGS = {
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    updateRoleLabels();
     loadDocuments();
     clearReviewDetails();
     loadAnalytics();
@@ -382,9 +383,15 @@ function renderDocuments(documents) {
 
         `;
 
-        div.addEventListener("click", () => {
-            selectedDocument = doc;
-            populateDetails(doc);
+        div.addEventListener("click", async () => {
+
+            if (isManager()) {
+                selectedDocument = doc;
+                populateWorkspaceDetails(doc);
+                return;
+            }
+
+            await openDocumentForReview(doc);
         });
 
         container.appendChild(div);
@@ -486,13 +493,12 @@ function initFilters() {
             // ACTIVE VIEW
             if (currentView === "active") {
 
-                docs =
-                    docs.filter(
-                        d =>
-                            d.reviewState !== "IN_REVIEW"
-                            &&
-                            d.reviewState !== "COMPLETED"
-                    );
+                docs = docs.filter(d =>
+                    d.status === "REVIEW" &&
+                    !d.assignedTo &&
+                    d.reviewState !== "COMPLETED" &&
+                    d.reviewState !== "IN_REVIEW"
+                );
             }
 
             // COMPLETED VIEW
@@ -601,20 +607,13 @@ function switchView(view) {
 
         showAllFilters();
         const activeDocs =
-            allDocuments.filter(
-                d =>
-
-                    d.status === "REVIEW"
-
-                    &&
-
-                    !d.assignedTo
-
-                    &&
-
-                    d.reviewState !==
-                    "COMPLETED"
+            allDocuments.filter(d =>
+                d.status === "REVIEW" &&
+                !d.assignedTo &&
+                d.reviewState !== "COMPLETED" &&
+                d.reviewState !== "IN_REVIEW"
             );
+
         renderDocuments(activeDocs);
     }
 
@@ -629,18 +628,27 @@ function switchView(view) {
         const currentUser =
             getCurrentUser();
 
-        const assignedDocs =
-            allDocuments.filter(
-                d =>
+        let assignedDocs;
 
-                    d.assignedTo ===
-                    currentUser.email
+        if (isManager()) {
 
-                    &&
+            assignedDocs =
+                allDocuments.filter(d =>
+                    d.assignedTo &&
+                    d.reviewState !== "COMPLETED"
+                );
 
-                    d.reviewState !==
-                    "COMPLETED"
-            );
+        } else {
+
+            const currentUser =
+                getCurrentUser();
+
+            assignedDocs =
+                allDocuments.filter(d =>
+                    d.assignedTo === currentUser.email &&
+                    d.reviewState !== "COMPLETED"
+                );
+        }
 
         renderDocuments(assignedDocs);
     }
@@ -834,28 +842,12 @@ function renderTimeline(history) {
 
 function initActions() {
 
-    const assignBtn =
-        document.getElementById(
-            "assignBtn"
-        );
+    const closeReviewBtn =
+        document.getElementById("closeReviewBtn");
 
-    assignBtn?.addEventListener(
+    closeReviewBtn?.addEventListener(
         "click",
-        () => {
-
-            if (!selectedDocument) {
-
-                showToast(
-                    "Select a document first."
-                );
-
-                return;
-            }
-
-            assignToMe(
-                selectedDocument.documentId
-            );
-        }
+        releaseDocument
     );
 
     const validateBtn =
@@ -877,6 +869,26 @@ function initActions() {
         "click",
         rejectDocument
     );
+
+    document
+    .getElementById("backToQueueBtn")
+    ?.addEventListener("click", releaseDocument);
+
+    document
+        .getElementById("workspaceCloseBtn")
+        ?.addEventListener("click", releaseDocument);
+
+    document
+        .getElementById("workspaceValidateBtn")
+        ?.addEventListener("click", completeValidation);
+
+    document
+        .getElementById("workspaceRejectBtn")
+        ?.addEventListener("click", rejectDocument);
+
+    document
+        .getElementById("assignAgentBtn")
+        ?.addEventListener("click", assignDocumentToAgent);
 }
 
 /* =========================================
@@ -1187,10 +1199,8 @@ function updateActionPermissions(doc) {
     const currentUser =
         getCurrentUser();
 
-    const assignBtn =
-        document.getElementById(
-            "assignBtn"
-        );
+    const closeReviewBtn =
+        document.getElementById("closeReviewBtn");
 
     const validateBtn =
         document.getElementById(
@@ -1225,8 +1235,7 @@ function updateActionPermissions(doc) {
 
         rejectBtn.style.display = "none";
 
-        assignBtn.style.display =
-            "none";
+        closeReviewBtn.style.display = "none";
 
         validateBtn.style.display =
             "none";
@@ -1313,8 +1322,7 @@ function updateActionPermissions(doc) {
 
         
         rejectBtn.style.display = "inline-flex";
-        assignBtn.style.display =
-            "none";
+        closeReviewBtn.style.display = "none";
 
         validateBtn.style.display =
             "none";
@@ -1328,8 +1336,7 @@ function updateActionPermissions(doc) {
     if (!doc.assignedTo) {
 
         rejectBtn.style.display = "none";
-        assignBtn.style.display =
-            "inline-flex";
+        closeReviewBtn.style.display = "inline-flex";
 
         validateBtn.style.display =
             "none";
@@ -1344,8 +1351,7 @@ function updateActionPermissions(doc) {
     }
 
     // ASSIGNED TO CURRENT USER
-    assignBtn.style.display =
-        "none";
+    closeReviewBtn.style.display = "inline-flex";
     
     
 
@@ -1445,7 +1451,7 @@ async function completeValidation() {
         const correctedFields = {};
 
         document
-            .querySelectorAll("#dynamicFields input")
+            .querySelectorAll("#workspaceDynamicFields input")
             .forEach(input => {
                 correctedFields[input.dataset.fieldKey] =
                     input.value.trim();
@@ -1466,12 +1472,13 @@ async function completeValidation() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
+                action: "COMPLETE_VALIDATION",
                 documentId: selectedDocument.documentId,
                 status: "VERIFIED",
                 reviewState: "COMPLETED",
                 correctedFields,
                 adminNotes:
-                    document.getElementById("adminNotes").value
+                    document.getElementById("workspaceAdminNotes").value
             })
         }
     );
@@ -1492,6 +1499,7 @@ async function completeValidation() {
     refreshCurrentView();
     clearReviewDetails();
     selectedDocument = null;
+    showQueueMode();
 }
 
 async function rejectDocument() {
@@ -1514,7 +1522,7 @@ async function rejectDocument() {
     }
 
     const reason =
-        document.getElementById("adminNotes").value.trim();
+        document.getElementById("workspaceAdminNotes").value.trim();
 
     if (!reason) {
         showToast("Please add rejection reason in admin notes.");
@@ -1536,6 +1544,7 @@ async function rejectDocument() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
+                action: "REJECT_DOCUMENT",
                 documentId: selectedDocument.documentId,
                 status: "FRAUD",
                 reviewState: "COMPLETED",
@@ -1560,6 +1569,7 @@ async function rejectDocument() {
     refreshCurrentView();
     clearReviewDetails();
     selectedDocument = null;
+    showQueueMode();
 }
 
 function initPreviewZoom() {
@@ -1787,4 +1797,415 @@ function getDisplayStatus(status) {
     }
 
     return status || "PROCESSING";
+}
+
+async function openDocumentForReview(doc) {
+
+    const currentUser = getCurrentUser();
+
+    const res = await fetch(
+        `${CONFIG.apiBaseUrl}/admin/update`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "OPEN_DOCUMENT",
+                documentId: doc.documentId,
+                assignedTo: currentUser.email
+            })
+        }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        showToast(
+            data.error ||
+            "This document is already opened by another admin."
+        );
+
+        await loadDocuments();
+        return;
+    }
+
+    selectedDocument = {
+        ...doc,
+        assignedTo: currentUser.email,
+        reviewState: "IN_REVIEW"
+    };
+
+    await loadDocuments();
+
+    //populateDetails(selectedDocument);
+    populateWorkspaceDetails(selectedDocument);
+}
+
+async function releaseDocument() {
+
+    if (!selectedDocument) {
+        return;
+    }
+
+    const confirmed =
+        await showConfirmModal(
+            "Close this document?\n\nIt will return to the current queue."
+        );
+
+    if (!confirmed) return;
+
+    const res = await fetch(
+        `${CONFIG.apiBaseUrl}/admin/update`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "RELEASE_DOCUMENT",
+                documentId: selectedDocument.documentId
+            })
+        }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        showToast(data.error || "Unable to close document.");
+        return;
+    }
+
+    selectedDocument = null;
+    clearReviewDetails();
+    await loadDocuments();
+    showQueueMode();
+
+    showToast("Document returned to queue.");
+}
+
+async function populateWorkspaceDetails(data) {
+    showReviewMode();
+
+    const fields =
+        data.correctedFields &&
+        Object.keys(data.correctedFields).length > 0
+            ? data.correctedFields
+            : data.extractedFields || {};
+
+    renderWorkspaceFields(fields);
+
+    document.getElementById("workspaceAdminNotes").value =
+        data.adminNotes || "";
+
+    const agentSelect =
+        document.getElementById("agentAssignSelect");
+
+    if (agentSelect) {
+        agentSelect.value = data.assignedTo || "";
+    }
+
+    try {
+        const res = await fetch(
+            `${CONFIG.previewUrl}?documentId=${data.documentId}`
+        );
+
+        const preview = await res.json();
+
+        if (res.ok && preview.url) {
+            renderWorkspacePreview(
+                preview.url,
+                preview.fileName
+            );
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    updateWorkspacePermissions(data);
+}
+
+function renderWorkspaceFields(fields) {
+    const container =
+        document.getElementById("workspaceDynamicFields");
+
+    if (!container) return;
+
+    const config =
+        Object.keys(fields)
+            .filter(key =>
+                key.toLowerCase() !== "confidence"
+            )
+            .sort((a, b) => {
+                const priorityA = getFieldPriority(a);
+                const priorityB = getFieldPriority(b);
+
+                if (priorityA !== priorityB) {
+                    return priorityA - priorityB;
+                }
+
+                return a.localeCompare(b);
+            })
+            .map(key => [
+                key,
+                formatFieldLabel(key)
+            ]);
+
+    container.innerHTML = config
+        .map(([key, label]) => `
+            <div class="field-editor">
+                <label>${label}</label>
+                <input
+                    data-field-key="${key}"
+                    type="text"
+                    value="${fields[key] || ""}"
+                >
+            </div>
+        `)
+        .join("");
+}
+
+function renderWorkspacePreview(url, fileName) {
+    const previewBox =
+        document.getElementById("workspacePreviewBox");
+
+    if (!previewBox) return;
+
+    const ext =
+        fileName.split(".").pop().toLowerCase();
+
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
+        previewBox.innerHTML = `
+            <img
+                src="${url}"
+                style="
+                    width:100%;
+                    height:100%;
+                    object-fit:contain;
+                    border-radius:20px;
+                "
+            />
+        `;
+        return;
+    }
+
+    if (ext === "pdf") {
+        previewBox.innerHTML = `
+            <embed
+                src="${url}#toolbar=1&navpanes=0&scrollbar=1"
+                type="application/pdf"
+                style="
+                    width:100%;
+                    height:100%;
+                    border:none;
+                    border-radius:20px;
+                    background:white;
+                "
+            />
+        `;
+        return;
+    }
+
+    previewBox.innerHTML = `
+        <a href="${url}" target="_blank">
+            Open document
+        </a>
+    `;
+}
+
+function showQueueMode() {
+    document.getElementById("queueLayout").style.display = "grid";
+    document.getElementById("reviewWorkspace").style.display = "none";
+}
+
+function showReviewMode() {
+    document.getElementById("queueLayout").style.display = "none";
+    document.getElementById("reviewWorkspace").style.display = "grid";
+}
+
+function updateWorkspacePermissions(doc) {
+
+    const managerSection =
+    document.getElementById("managerAssignSection");
+
+    const validateBtn =
+        document.getElementById("workspaceValidateBtn");
+
+    const rejectBtn =
+        document.getElementById("workspaceRejectBtn");
+
+    const closeBtn =
+        document.getElementById("workspaceCloseBtn");
+
+    const backBtn =
+        document.getElementById("backToQueueBtn");
+
+    const isCompleted =
+        doc.reviewState === "COMPLETED" ||
+        doc.status === "VERIFIED" ||
+        doc.status === "FRAUD";
+
+    const inputs =
+        document.querySelectorAll(
+            "#workspaceDynamicFields input"
+        );
+
+    const notes =
+        document.getElementById(
+            "workspaceAdminNotes"
+        );
+    if (!isManager()) {
+
+        managerSection.style.display = "none";
+
+        validateBtn.style.display = "inline-flex";
+        rejectBtn.style.display = "inline-flex";
+        closeBtn.style.display = "inline-flex";
+
+        inputs.forEach(input => {
+            input.disabled = false;
+        });
+
+        notes.disabled = false;
+    }
+
+
+    if (isManager()) {
+
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+
+        notes.disabled = true;
+
+        // COMPLETED DOCUMENTS
+        if (
+            doc.reviewState === "COMPLETED" ||
+            doc.status === "VERIFIED" ||
+            doc.status === "FRAUD"
+        ) {
+
+            managerSection.style.display = "none";
+
+        } else {
+
+            managerSection.style.display =
+                (
+                    currentView === "active" ||
+                    currentView === "assigned"
+                )
+                    ? "block"
+                    : "none";
+
+            const assignBtn =
+                document.getElementById("assignAgentBtn");
+
+            if (assignBtn) {
+                assignBtn.textContent =
+                    currentView === "assigned"
+                        ? "Reassign Document"
+                        : "Assign Document";
+            }
+        }
+
+        validateBtn.style.display = "none";
+        rejectBtn.style.display = "none";
+        closeBtn.style.display = "none";
+
+        backBtn.onclick = () => {
+            selectedDocument = null;
+            clearReviewDetails();
+            showQueueMode();
+        };
+
+        return;
+    }
+
+    managerSection.style.display = "none";
+
+    if (isCompleted) {
+
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+
+        notes.disabled = true;
+
+        validateBtn.style.display = "none";
+        rejectBtn.style.display = "none";
+        closeBtn.style.display = "none";
+
+        return;
+    }
+
+    inputs.forEach(input => {
+        input.disabled = false;
+    });
+
+    notes.disabled = false;
+
+    validateBtn.style.display = "inline-flex";
+    rejectBtn.style.display = "inline-flex";
+}
+
+async function assignDocumentToAgent() {
+
+    if (!selectedDocument) {
+        showToast("Select a document first.");
+        return;
+    }
+
+    const agentEmail =
+        document.getElementById("agentAssignSelect").value;
+
+    if (!agentEmail) {
+        showToast("Select an agent.");
+        return;
+    }
+
+    const currentUser = getCurrentUser();
+
+    const res = await fetch(
+        `${CONFIG.apiBaseUrl}/admin/update`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "MANAGER_ASSIGN",
+                documentId: selectedDocument.documentId,
+                assignedTo: agentEmail,
+                assignedBy: currentUser.email,
+                reviewState: "ASSIGNED"
+            })
+        }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        showToast(data.error || "Assignment failed.");
+        return;
+    }
+
+    showToast("Document assigned.");
+
+    selectedDocument = null;
+    clearReviewDetails();
+    showQueueMode();
+    await loadDocuments();
+}
+
+function updateRoleLabels() {
+
+    const assignedLink =
+        document.querySelector('[data-view="assigned"]');
+
+    if (!assignedLink) return;
+
+    if (isManager()) {
+        assignedLink.textContent = "Assigned Documents";
+    } else {
+        assignedLink.textContent = "Assigned To Me";
+    }
 }

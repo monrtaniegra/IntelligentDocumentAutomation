@@ -59,18 +59,26 @@ function loginUser(email, password, role) {
             const groups =
                 payload["cognito:groups"] || [];
 
-            const isAdmin =
+            const isManager =
+                groups.includes("Managers");
+
+            const isAgent =
+                groups.includes("Agents") ||
                 groups.includes("Admins");
 
             if (role === "admin") {
 
-                if (!isAdmin) {
-                    showToast("You are not authorized for Admin Portal");
+                if (!isManager && !isAgent) {
+
+                    showToast(
+                        "You are not authorized for Admin Portal"
+                    );
+
                     return;
                 }
 
-                window.location.href = "admin.html";
-
+                window.location.href =
+                    "admin.html";
             } else {
 
                 window.location.href = "customer.html";
@@ -409,4 +417,25 @@ function showToast(message) {
         );
 
     }, 2500);
+}
+
+function isManager() {
+
+    const user = getCurrentUser();
+
+    return user &&
+        user.groups &&
+        user.groups.includes("Managers");
+}
+
+function isAgent() {
+
+    const user = getCurrentUser();
+
+    return user &&
+        user.groups &&
+        (
+            user.groups.includes("Agents") ||
+            user.groups.includes("Admins")
+        );
 }

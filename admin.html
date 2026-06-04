@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | IDA</title>
+    <title>Workqueue Dashboard | IDA</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -22,7 +22,7 @@
 
             <div class="logo-text">
                 <div class="logo-title">IDA</div>
-                <div class="logo-sub">Admin Portal</div>
+                <div class="logo-sub">Workqueue</div>
             </div>
         </div>
 
@@ -40,7 +40,7 @@
                 class="nav-link"
                 data-view="assigned"
             >
-                Assigned To Me
+                Assigned Documents
             </a>
 
             <a
@@ -72,7 +72,7 @@
         <header class="topbar">
 
             <div>
-                <h1>Admin Dashboard 🛡️</h1>
+                <h1>Workqueue </h1>
 
                 <p>
                     Review uploaded documents and monitor fraud activity.
@@ -131,7 +131,7 @@
             </section>
 
             <!-- CONTENT -->
-            <section class="content-grid">
+            <section   id="queueLayout" class="content-grid">
 
                 <!-- LEFT -->
                 <div class="card documents-panel">
@@ -222,10 +222,10 @@
 
                     </div>
                     <button
-                        id="assignBtn"
+                        id="closeReviewBtn"
                         class="btn-secondary"
                     >
-                        Assign To Me
+                        Close Document
                     </button>
                     <div class="admin-actions">
 
@@ -240,6 +240,90 @@
 
                 </div>
 
+            </section>
+
+            <section
+                id="reviewWorkspace"
+                class="review-workspace"
+                style="display:none;"
+            >
+                <div class="card preview-workspace">
+                    <button
+                        id="backToQueueBtn"
+                        class="btn-secondary"
+                    >
+                        ← Back to Queue
+                    </button>
+
+                    <div
+                        class="preview-box"
+                        id="workspacePreviewBox"
+                    >
+                        Document preview
+                    </div>
+                </div>
+
+                <div
+                    id="workspaceReviewPanel"
+                    class="card details-panel"
+                >
+                    <h3>Validation Fields</h3>
+
+                    <div id="workspaceDynamicFields"></div>
+
+                    <div id="managerAssignSection" style="display:none; margin-top:20px;">
+                        <label class="note-label">
+                            Assign To Agent
+                        </label>
+
+                        <select id="agentAssignSelect" class="admin-notes">
+                            <option value="">Select agent...</option>
+                            <option value="admin@infocap.ai">admin@infocap.ai</option>
+                            <option value="admin2@infocap.ai">admin2@infocap.ai</option>
+                        </select>
+
+                        <button
+                            id="assignAgentBtn"
+                            class="btn-secondary"
+                            style="margin-top:12px;"
+                        >
+                            Assign Document
+                        </button>
+                    </div>
+
+                    <label class="note-label">
+                        Admin Review Notes
+                    </label>
+
+                    <textarea
+                        id="workspaceAdminNotes"
+                        class="admin-notes"
+                        placeholder="Add validation notes..."
+                    ></textarea>
+
+                    <div class="admin-actions">
+                        <button
+                            id="workspaceCloseBtn"
+                            class="btn-secondary"
+                        >
+                            Close Document
+                        </button>
+
+                        <button
+                            id="workspaceValidateBtn"
+                            class="btn-success"
+                        >
+                            Validation Completed
+                        </button>
+
+                        <button
+                            id="workspaceRejectBtn"
+                            class="btn-danger"
+                        >
+                            Reject Document
+                        </button>
+                    </div>
+                </div>
             </section>
 
         </div>
