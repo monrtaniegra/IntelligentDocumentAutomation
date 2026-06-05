@@ -44,6 +44,13 @@
             </a>
 
             <a
+                class="nav-link manager-only"
+                data-view="escalated"
+            >
+                Escalated Queue
+            </a>
+
+            <a
                 class="nav-link"
                 data-view="completed"
             >
@@ -75,7 +82,7 @@
                 <h1>Workqueue </h1>
 
                 <p>
-                    Review uploaded documents and monitor fraud activity.
+                    Review uploaded documents.
                 </p>
             </div>
 
@@ -103,7 +110,7 @@
                 </div>
 
                 <div class="card stat-card">
-                    <p>Fraud</p>
+                    <p>Rejected</p>
                     <h2 id="adminFraud">0</h2>
                 </div>
 
@@ -121,7 +128,7 @@
                 </button>
 
                 <button class="filter-btn" data-filter="FRAUD">
-                    Fraud
+                    Rejected
                 </button>
 
                 <button class="filter-btn" data-filter="ONGOING">
@@ -161,7 +168,7 @@
                             </option>
 
                             <option value="FRAUD">
-                                Fraud
+                                Rejected
                             </option>
 
                             <option value="ONGOING">
@@ -235,6 +242,7 @@
                         <button id="rejectBtn" class="btn-danger">
                             Reject Document
                         </button>
+
 
                     </div>
 
@@ -322,6 +330,12 @@
                         >
                             Reject Document
                         </button>
+                        <button
+                            id="workspaceEscalateBtn"
+                            class="btn-warning"
+                        >
+                            Escalate to Manager
+                        </button>
                     </div>
                 </div>
             </section>
@@ -340,7 +354,7 @@
                 <div class="card analytics-card">
 
                     <div class="analytics-header">
-                        <h3>Fraud Rate</h3>
+                        <h3>Rejected Rate</h3>
                         <span id="fraudRateValue">0%</span>
                     </div>
 
@@ -376,7 +390,7 @@
                 <div class="card analytics-card">
 
                     <div class="analytics-header">
-                        <h3>Average Fraud Score</h3>
+                        <h3>Average Rejected Document</h3>
                         <span id="avgFraudScore">
                             0
                         </span>

@@ -391,6 +391,11 @@ function renderDocuments(documents) {
                 return;
             }
 
+            if (doc.reviewState === "ESCALATED") {
+                showToast("This document was escalated to manager.");
+                return;
+            }
+
             await openDocumentForReview(doc);
         });
 
@@ -611,7 +616,8 @@ function switchView(view) {
                 d.status === "REVIEW" &&
                 !d.assignedTo &&
                 d.reviewState !== "COMPLETED" &&
-                d.reviewState !== "IN_REVIEW"
+                d.reviewState !== "IN_REVIEW" &&
+                d.reviewState !== "ESCALATED"
             );
 
         renderDocuments(activeDocs);
@@ -689,6 +695,18 @@ function switchView(view) {
 
         analyticsView.style.display =
             "block";
+    }
+
+    else if (view === "escalated") {
+
+        topFilters.style.display = "none";
+
+        const escalatedDocs =
+            allDocuments.filter(d =>
+                d.reviewState === "ESCALATED"
+            );
+
+        renderDocuments(escalatedDocs);
     }
 }
 
@@ -889,6 +907,10 @@ function initActions() {
     document
         .getElementById("assignAgentBtn")
         ?.addEventListener("click", assignDocumentToAgent);
+
+    document
+        .getElementById("workspaceEscalateBtn")
+        ?.addEventListener("click", escalateDocument);
 }
 
 /* =========================================
@@ -1438,14 +1460,21 @@ async function completeValidation() {
 
     const currentUser = getCurrentUser();
 
-    if (!selectedDocument.assignedTo) {
-        showToast("Assign this document to yourself first.");
-        return;
-    }
+    const isEscalatedManager =
+        isManager() &&
+        selectedDocument.reviewState === "ESCALATED";
 
-    if (selectedDocument.assignedTo !== currentUser.email) {
-        showToast(`Assigned to ${selectedDocument.assignedTo}`);
-        return;
+    if (!isEscalatedManager) {
+
+        if (!selectedDocument.assignedTo) {
+            showToast("Assign this document to yourself first.");
+            return;
+        }
+
+        if (selectedDocument.assignedTo !== currentUser.email) {
+            showToast(`Assigned to ${selectedDocument.assignedTo}`);
+            return;
+        }
     }
 
         const correctedFields = {};
@@ -1511,14 +1540,21 @@ async function rejectDocument() {
 
     const currentUser = getCurrentUser();
 
-    if (!selectedDocument.assignedTo) {
-        showToast("Assign this document to yourself first.");
-        return;
-    }
+    const isEscalatedManager =
+        isManager() &&
+        selectedDocument.reviewState === "ESCALATED";
 
-    if (selectedDocument.assignedTo !== currentUser.email) {
-        showToast(`Assigned to ${selectedDocument.assignedTo}`);
-        return;
+    if (!isEscalatedManager) {
+
+        if (!selectedDocument.assignedTo) {
+            showToast("Assign this document to yourself first.");
+            return;
+        }
+
+        if (selectedDocument.assignedTo !== currentUser.email) {
+            showToast(`Assigned to ${selectedDocument.assignedTo}`);
+            return;
+        }
     }
 
     const reason =
@@ -2024,6 +2060,9 @@ function showReviewMode() {
 
 function updateWorkspacePermissions(doc) {
 
+    const escalateBtn =
+    document.getElementById("workspaceEscalateBtn");
+
     const managerSection =
     document.getElementById("managerAssignSection");
 
@@ -2056,7 +2095,7 @@ function updateWorkspacePermissions(doc) {
     if (!isManager()) {
 
         managerSection.style.display = "none";
-
+        escalateBtn.style.display = "inline-flex";
         validateBtn.style.display = "inline-flex";
         rejectBtn.style.display = "inline-flex";
         closeBtn.style.display = "inline-flex";
@@ -2066,6 +2105,24 @@ function updateWorkspacePermissions(doc) {
         });
 
         notes.disabled = false;
+    }
+
+    if (isManager() && doc.reviewState === "ESCALATED") {
+
+        inputs.forEach(input => {
+            input.disabled = false;
+        });
+
+        notes.disabled = false;
+
+        managerSection.style.display = "none";
+
+        validateBtn.style.display = "inline-flex";
+        rejectBtn.style.display = "inline-flex";
+        closeBtn.style.display = "inline-flex";
+        escalateBtn.style.display = "none";
+
+        return;
     }
 
 
@@ -2106,7 +2163,7 @@ function updateWorkspacePermissions(doc) {
                         : "Assign Document";
             }
         }
-
+        escalateBtn.style.display = "none";
         validateBtn.style.display = "none";
         rejectBtn.style.display = "none";
         closeBtn.style.display = "none";
@@ -2129,13 +2186,15 @@ function updateWorkspacePermissions(doc) {
         });
 
         notes.disabled = true;
-
+        escalateBtn.style.display = "none";
         validateBtn.style.display = "none";
         rejectBtn.style.display = "none";
         closeBtn.style.display = "none";
 
         return;
     }
+
+    
 
     inputs.forEach(input => {
         input.disabled = false;
@@ -2207,5 +2266,81 @@ function updateRoleLabels() {
         assignedLink.textContent = "Assigned Documents";
     } else {
         assignedLink.textContent = "Assigned To Me";
+    }
+}
+
+async function escalateDocument() {
+
+    if (!selectedDocument) {
+        showToast("Select a document first.");
+        return;
+    }
+
+    const notes =
+        document.getElementById("workspaceAdminNotes").value.trim();
+
+    if (!notes) {
+        showToast("Please add escalation reason in notes.");
+        return;
+    }
+
+    const confirmed =
+        await showConfirmModal(
+            "Escalate this document to Manager?\n\nThis will remove it from your queue."
+        );
+
+    if (!confirmed) return;
+
+    const res = await fetch(
+        `${CONFIG.apiBaseUrl}/admin/update`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "ESCALATE_DOCUMENT",
+                documentId: selectedDocument.documentId,
+                escalatedBy: getCurrentUser().email,
+                escalationReason: notes
+            })
+        }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        showToast(data.error || "Escalation failed.");
+        return;
+    }
+
+    showToast("Document escalated to Manager.");
+
+    selectedDocument = null;
+    clearReviewDetails();
+    showQueueMode();
+    await loadDocuments();
+}
+
+function updateRoleLabels() {
+
+    const assignedLink =
+        document.querySelector('[data-view="assigned"]');
+
+    const escalatedLink =
+        document.querySelector('[data-view="escalated"]');
+
+    if (assignedLink) {
+        assignedLink.textContent =
+            isManager()
+                ? "Assigned Documents"
+                : "Assigned To Me";
+    }
+
+    if (escalatedLink) {
+        escalatedLink.style.display =
+            isManager()
+                ? "block"
+                : "none";
     }
 }
